@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">BlueTalkie</string>
+    <string name="action_discover">Discover</string>
+    <string name="pick_image_intent_text">Add avatar</string>
+</resources>

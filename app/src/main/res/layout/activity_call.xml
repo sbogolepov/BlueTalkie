@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/lightPrimaryColor"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+        <ImageView
+        android:id="@+id/contact_avatar_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/default_avatar"
+        android:scaleType="centerCrop"/>
+
+
+        <android.support.design.widget.CoordinatorLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/talk"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="80dp"
+                android:layout_marginStart="80dp"
+                android:layout_marginBottom="20dp"
+                android:layout_gravity="bottom|start"
+                app:backgroundTint="@color/green"
+                android:clickable="true"
+                android:src="@drawable/ic_mic_white_24dp" />
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/disconnect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:backgroundTint="@color/red"
+                android:layout_marginRight="80dp"
+                android:layout_marginEnd="80dp"
+                android:layout_marginBottom="20dp"
+                android:layout_gravity="bottom|end"
+                android:clickable="true"
+                android:src="@drawable/ic_call_end_white_24dp" />
+        </android.support.design.widget.CoordinatorLayout>
+
+    </RelativeLayout>
+</layout>
