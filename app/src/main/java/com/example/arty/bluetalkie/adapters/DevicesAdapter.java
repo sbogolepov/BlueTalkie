@@ -68,4 +68,8 @@ public class DevicesAdapter extends RecyclerView.Adapter<DevicesAdapter.ViewHold
             addressTextView.setText(device.getAddress());
         }
     }
+
+    public interface AdapterCallback {
+        void onItemClick(Device device);
+    }
 }

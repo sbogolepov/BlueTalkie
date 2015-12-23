@@ -15,7 +15,8 @@ import java.io.OutputStream;
  * Created by sergey on 22/12/15.
  */
 public class ImageUtils {
-    public static boolean saveImage(Context context, String packageName, String filename, Bitmap bitmap) {
+    public static boolean saveImage(Context context, String filename, Bitmap bitmap) {
+        String packageName = context.getPackageName();
         String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + packageName;
         try {
             File dir = new File(fullPath);
@@ -37,7 +38,8 @@ public class ImageUtils {
         }
     }
 
-    public static Bitmap loadImage(String packageName, String filename) {
+    public static Bitmap loadImage(Context context, String filename) {
+        String packageName = context.getPackageName();
         String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + packageName + "/" + filename;
         return BitmapFactory.decodeFile(fullPath);
     }

@@ -296,7 +296,7 @@ public class BluetoothWrapper {
          *
          * @param packet
          */
-        public void write(Packet packet) {
+        public synchronized void write(Packet packet) {
             try {
                 d("Put to the socket: " + Arrays.toString(packet.getData()));
                 oos.writeObject(packet);
