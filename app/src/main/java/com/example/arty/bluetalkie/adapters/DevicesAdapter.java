@@ -17,8 +17,8 @@ import java.util.List;
  * Created by arty on 19.12.15.
  */
 public class DevicesAdapter extends RecyclerView.Adapter<DevicesAdapter.ViewHolder> {
-    private List<Device> mDevices;
-    private AdapterCallback callback;
+    private final List<Device> mDevices;
+    private final AdapterCallback callback;
 
     public DevicesAdapter(AdapterCallback callback) {
         mDevices = new ArrayList<>();
@@ -26,8 +26,10 @@ public class DevicesAdapter extends RecyclerView.Adapter<DevicesAdapter.ViewHold
     }
 
     public void add(Device device) {
-        mDevices.add(device);
-        notifyDataSetChanged();
+        if (!mDevices.contains(device)) {
+            mDevices.add(device);
+            notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -48,9 +50,8 @@ public class DevicesAdapter extends RecyclerView.Adapter<DevicesAdapter.ViewHold
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView nameTextView;
-        private TextView addressTextView;
-        private ImageView imageView;
+        private final TextView nameTextView;
+        private final TextView addressTextView;
 
         private Device device;
 
@@ -58,7 +59,6 @@ public class DevicesAdapter extends RecyclerView.Adapter<DevicesAdapter.ViewHold
             super(itemView);
             nameTextView = (TextView) itemView.findViewById(R.id.device_name);
             addressTextView = (TextView) itemView.findViewById(R.id.device_address);
-            imageView = (ImageView) itemView.findViewById(R.id.device_image);
             itemView.setOnClickListener(v -> callback.onItemClick(device));
         }
 

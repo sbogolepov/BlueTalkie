@@ -1,5 +1,6 @@
 package com.example.arty.bluetalkie.audio;
 
+import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.media.audiofx.NoiseSuppressor;
@@ -10,23 +11,29 @@ import java.util.Arrays;
 /**
  * Created by sergey on 21/12/15.
  */
-public class AudioRecorder {
+public final class AudioRecorder {
 
     private static final String LOG_TAG = AudioRecorder.class.getName();
 
-    AudioRecord audioRecord;
-    boolean isRecording;
-    int recBufSize;
+    private static AudioRecorder audioRecorder;
 
-    public interface AudioChunkReceiver {
-        void onChunkReceived(byte[] chunk, int chunkLength);
+    private final AudioRecord audioRecord;
+    private boolean isRecording;
+    private int recBufSize;
+
+    public static AudioRecorder get() {
+        if (audioRecorder == null) {
+            audioRecorder = new AudioRecorder();
+        }
+        return audioRecorder;
     }
 
-    public AudioRecorder() {
+    private AudioRecorder() {
+
         recBufSize = AudioRecord.getMinBufferSize(AudioSettings.FREQUENCY,
-                AudioSettings.CHANNEL_CONFIGURATION, AudioSettings.AUDIO_ENCODING);
+                AudioSettings.CHANNEL_CONF_IN, AudioSettings.AUDIO_ENCODING);
         audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, AudioSettings.FREQUENCY,
-                AudioSettings.CHANNEL_CONFIGURATION, AudioSettings.AUDIO_ENCODING, recBufSize);
+                AudioSettings.CHANNEL_CONF_IN, AudioSettings.AUDIO_ENCODING, recBufSize*3);
         NoiseSuppressor.create(audioRecord.getAudioSessionId());
     }
 
@@ -44,7 +51,6 @@ public class AudioRecorder {
                 isRecording = true;
                 while (isRecording) {
                     int readSize = audioRecord.read(buffer, 0, recBufSize);
-                    //d("Recorded:" + Arrays.toString(buffer));
                     receiver.onChunkReceived(buffer, readSize);
                 }
                 audioRecord.stop();
@@ -58,5 +64,9 @@ public class AudioRecorder {
 
     private static void d(String msg) {
         Log.d(LOG_TAG, msg);
+    }
+
+    public interface AudioChunkReceiver {
+        void onChunkReceived(byte[] chunk, int chunkLength);
     }
 }

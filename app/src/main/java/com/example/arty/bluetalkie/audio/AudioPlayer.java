@@ -1,5 +1,6 @@
 package com.example.arty.bluetalkie.audio;
 
+import android.content.Context;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Process;
@@ -12,29 +13,35 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Created by sergey on 21/12/15.
  */
-public class AudioPlayer {
-    AudioTrack audioTrack;
-    boolean isPlaying;
-    int playBufSize;
+public final class AudioPlayer {
+    private final AudioTrack audioTrack;
+    private boolean isPlaying;
 
     private static final String LOG_TAG = AudioPlayer.class.getName();
 
+    private static AudioPlayer audioPlayer;
+
     final BlockingQueue<byte[]> queue;
 
+    public static AudioPlayer get(Context ctx) {
+        if (audioPlayer == null) {
+            audioPlayer = new AudioPlayer(ctx);
+        }
+        return audioPlayer;
+    }
 
-    public AudioPlayer() {
-        playBufSize = AudioTrack.getMinBufferSize(AudioSettings.FREQUENCY, AudioSettings.CHANNEL_CONFIGURATION,
+    private AudioPlayer(Context ctx) {
+        int playBufSize = AudioTrack.getMinBufferSize(AudioSettings.FREQUENCY, AudioSettings.CHANNEL_CONF_OUT,
                 AudioSettings.AUDIO_ENCODING);
         audioTrack = new AudioTrack(AudioManager.STREAM_VOICE_CALL, AudioSettings.FREQUENCY,
-                AudioSettings.CHANNEL_CONFIGURATION, AudioSettings.AUDIO_ENCODING, playBufSize * 2, AudioTrack.MODE_STREAM);
-        audioTrack.setStereoVolume(AudioTrack.getMaxVolume(), AudioTrack.getMaxVolume());
+                AudioSettings.CHANNEL_CONF_OUT, AudioSettings.AUDIO_ENCODING, playBufSize * 3, AudioTrack.MODE_STREAM);
         queue = new ArrayBlockingQueue<>(1);
-        d("playBufSize = " + String.valueOf(playBufSize));
+        audioTrack.setStereoVolume(AudioTrack.getMaxVolume(), AudioTrack.getMaxVolume());
+
     }
 
     public void start() {
         new Thread() {
-
             @Override
             public void run() {
                 byte[] buffer;
@@ -58,7 +65,7 @@ public class AudioPlayer {
         }.start();
     }
 
-    public void addChunk(byte[] chunk) {
+    public synchronized void addChunk(byte[] chunk) {
         byte[] b = new byte[chunk.length];
         System.arraycopy(chunk, 0, b, 0, chunk.length);
         d("Array to put in queue: " + Arrays.toString(b));
@@ -69,7 +76,7 @@ public class AudioPlayer {
         }
     }
 
-    public void stop() {
+    public synchronized void stop() {
         isPlaying = false;
         queue.clear();
         audioTrack.flush();

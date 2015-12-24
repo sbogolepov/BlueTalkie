@@ -29,10 +29,10 @@ public class CallActivity extends AppCompatActivity implements CallPresenter.Cal
         binding = DataBindingUtil.setContentView(this, R.layout.activity_call);
 
         presenter = new CallPresenter(this);
-        presenter.onCreate(binding.contactAvatarView::setImageBitmap);
+        presenter.onCreate(binding.contactAvatarView::setImageBitmap, this::onDisconnect);
 
         binding.disconnect.setOnClickListener(v ->
-                presenter.onDisconnect(() -> startActivity(new Intent(this, MainActivity.class)))
+                presenter.onDisconnect(this::onDisconnect)
         );
 
         binding.talk.setOnTouchListener((v, event) -> {
@@ -55,5 +55,9 @@ public class CallActivity extends AppCompatActivity implements CallPresenter.Cal
     @Override
     public Context getApplicationContext() {
         return super.getApplicationContext();
+    }
+
+    private void onDisconnect() {
+        startActivity(new Intent(this, MainActivity.class));
     }
 }

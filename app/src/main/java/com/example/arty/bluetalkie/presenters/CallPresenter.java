@@ -1,6 +1,5 @@
 package com.example.arty.bluetalkie.presenters;
 
-import android.app.Application;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -38,12 +37,12 @@ public class CallPresenter {
 
     public CallPresenter(CallView view) {
         callView = view;
-        player = new AudioPlayer();
-        recorder = new AudioRecorder();
+        player = AudioPlayer.get(view.getApplicationContext());
+        recorder = AudioRecorder.get();
         bluetoothWrapper = BluetoothWrapper.get(view.getApplicationContext());
     }
 
-    public void onCreate(AvatarLoadedListener avatarLoadedListener) {
+    public void onCreate(AvatarLoadedListener avatarLoadedListener, DisconnectListener disconnectListener) {
         player.start();
 
         avatarHandler = new Handler(msg -> {
@@ -67,6 +66,10 @@ public class CallPresenter {
                     byte[] c = new byte[data.length];
                     System.arraycopy(data, 0, c, 0, data.length);
                     avatarHandler.obtainMessage(MSG_AVATAR_LOADED, c.length, -1, c).sendToTarget();
+                    break;
+                case BYE:
+                    disconnect(disconnectListener);
+                    break;
             }
         });
         connectionThread.start();
@@ -98,8 +101,14 @@ public class CallPresenter {
     }
 
     public void onDisconnect(DisconnectListener disconnectListener) {
+        connectionThread.write(new Packet(Packet.Type.BYE, null));
+        disconnect(disconnectListener);
+    }
+
+    private void disconnect(DisconnectListener disconnectListener) {
         player.stop();
         recorder.stop();
+        connectionThread.cancel();
         try {
             if (socket != null) {
                 socket.close();
