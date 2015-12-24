@@ -146,7 +146,7 @@ public class BluetoothWrapper {
      *
      * @param socket
      * @param callback
-     * @return
+     * @return created thread
      */
     public ConnectionThread createConnectionThread(BluetoothSocket socket, DataReceivedCallback callback) {
         return new ConnectionThread(socket, callback);
@@ -242,7 +242,7 @@ public class BluetoothWrapper {
         }
     }
 
-    public class ConnectionThread extends Thread {
+    public class ConnectionThread<T> extends Thread {
 
         //public static final int BUFFER_SIZE = 1024 * 8;
 

@@ -11,7 +11,6 @@ public class Packet implements Serializable {
 
     private static final String LOG_TAG = Packet.class.getName();
 
-
     public enum Type {
         FLOOD(0),
         AVATAR(1),

@@ -11,6 +11,7 @@ import com.example.arty.bluetalkie.audio.AudioPlayer;
 import com.example.arty.bluetalkie.audio.AudioRecorder;
 import com.example.arty.bluetalkie.communication.BluetoothWrapper;
 import com.example.arty.bluetalkie.communication.Packet;
+import com.example.arty.bluetalkie.utils.ImageUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,6 +20,10 @@ import java.io.IOException;
  * Created by sergey on 24/12/15.
  */
 public class CallPresenter {
+
+    private static final int MSG_AVATAR_LOADED = 5076;
+    private static final String AVATAR_FILENAME = "avatar.png";
+
 
     private CallView callView;
 
@@ -31,8 +36,6 @@ public class CallPresenter {
 
     BluetoothSocket socket;
 
-    private static final int MSG_AVATAR_LOADED = 5076;
-
     public CallPresenter(CallView view) {
         callView = view;
         player = new AudioPlayer();
@@ -40,7 +43,7 @@ public class CallPresenter {
         bluetoothWrapper = BluetoothWrapper.get(view.getApplicationContext());
     }
 
-    public void onCreate() {
+    public void onCreate(AvatarLoadedListener avatarLoadedListener) {
         player.start();
 
         avatarHandler = new Handler(msg -> {
@@ -48,7 +51,7 @@ public class CallPresenter {
                 byte[] data = (byte[]) msg.obj;
                 Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, msg.arg1);
                 if (bitmap != null) {
-                    callView.onAvatarLoaded(bitmap);
+                    avatarLoadedListener.onAvatarLoaded(bitmap);
                 }
             }
             return true;
@@ -67,20 +70,23 @@ public class CallPresenter {
             }
         });
         connectionThread.start();
+
+        Bitmap avatar = ImageUtils.loadImage(callView.getApplicationContext(), AVATAR_FILENAME);
+        uploadAvatar(avatar);
     }
 
-    public void onStartRecording() {
+    public void startRecording() {
         recorder.start((chunk, chunkLength) -> {
             Packet packet = new Packet(Packet.Type.AUDIO_CHUNK, chunk);
             connectionThread.write(packet);
         });
     }
 
-    public void onStopRecording() {
+    public void stopRecording() {
         recorder.stop();
     }
 
-    public void uploadAvatar(Bitmap avatar) {
+    private void uploadAvatar(Bitmap avatar) {
         Thread uploadAvatarThread = new Thread(() -> {
             if (avatar != null) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -91,7 +97,7 @@ public class CallPresenter {
         uploadAvatarThread.start();
     }
 
-    public void onDisconnect() {
+    public void onDisconnect(DisconnectListener disconnectListener) {
         player.stop();
         recorder.stop();
         try {
@@ -101,15 +107,19 @@ public class CallPresenter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        callView.onDisconnect();
+        disconnectListener.onDisconnect();
+    }
+
+    public interface DisconnectListener {
+        void onDisconnect();
+    }
+
+    public interface AvatarLoadedListener {
+        void onAvatarLoaded(Bitmap bitmap);
     }
 
     public interface CallView {
         Context getApplicationContext();
-
-        void onAvatarLoaded(Bitmap bitmap);
-
-        void onDisconnect();
     }
 
 }
